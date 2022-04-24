@@ -23,13 +23,13 @@ This is meant as a fun project for me! Enjoy!
 """
 
 import asyncio
-from flask import Flask
+import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
-import requests
-from threading import Thread
-import time
-import urllib
+import aiohttp
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 """
@@ -55,20 +55,29 @@ async def get_current_doc_amount(TAGDB):
     """Get the current docs amount"""
     return await TAGDB.count_documents({})
 
+loop = asyncio.get_event_loop()
 
 class TagscriptMiner:
     """Mining and tracking tag information"""
 
     def __init__(self) -> None:
         self.api_url = "https://carl.gg/api/v1/tags/"
-        self.loop = asyncio.get_event_loop()
-        
         connection_string = f"mongodb+srv://{os.environ['Mongo_User']}:{os.environ['Mongo_Pass']}@carltagscluster.nyxt2.mongodb.net/TagDB?retryWrites=true&w=majority"
         self.MONGODB = AsyncIOMotorClient(connection_string)
         self.TAGDB = self.MONGODB["TagDB"]["Tags"]
-        self.count = self.loop.run_until_complete(get_current_tag_id(self.MONGODB))
-        self.doc_amount = self.loop.run_until_complete(get_current_doc_amount(self.TAGDB))
+
         print("Connected to DB")
+
+    async def start(self) -> None:
+        """Start the bot"""
+                    
+        self.count = await get_current_tag_id(self.MONGODB)
+        self.doc_amount = await get_current_doc_amount(self.TAGDB)
+
+        print(f"Starting miner.\nContinuing at Tag ID: {miner.count}")
+        async with aiohttp.ClientSession() as ses:
+            while True:
+                await self.store_data(ses)
 
 
     async def save_TagDB(self, data: dict) -> None:
@@ -77,11 +86,15 @@ class TagscriptMiner:
             "_id": data.get("id"),
             "created_at": data.get("created_at", None),
             "guild_id": data.get("location_id", None),
-            "tag_name": data.get("name")[:25],
+            "tag_name": data.get("name"),
             "nsfw": data.get("nsfw", None),
             "owner_id": data.get("owner_id", None),
             "sharer": data.get("sharer", None),
-            "uses": data.get("uses", 0)
+            "uses": data.get("uses", 0),
+            "content": data.get("content", ""),
+            "embed": data.get("embed", ""),
+            "last_fetched": datetime.datetime.utcnow(),
+            "deleted": False,
         }
         result = await self.TAGDB.insert_one(document)
         print(f"Saved Tag ID: {repr(result.inserted_id)} to database")
@@ -96,51 +109,32 @@ class TagscriptMiner:
         await config.update_one({"config": "config"}, {"$set": {"count": self.count}})
 
 
-    def store_data(self):
+    async def store_data(self, ses):
         """The function to start storing the data"""
         try:
-            tag = requests.get(self.api_url + str(self.count))
+            async with ses.get(self.api_url + str(self.count)) as tag:
+                #print(f"Attempting to save Tag ID: {str(self.count)}")
+                self.count += 1
+                if (self.count % 100) == 0:
+                    loop.create_task(self.save_current_count())
+                if tag.status == 404:
+                    await asyncio.sleep(0.05)
+                    #print(f"Non Existent")
+                elif tag.status == 200:
+                    loop.create_task(self.save_TagDB(await tag.json()))
+                    await asyncio.sleep(0.05)
+                else:
+                    print(str(tag.status) + " failed. not sure why")
+                    await asyncio.sleep(3)
+                    return
+
         except:
             # if for some reason something goes wrong when requesting
             print("Encountered 104, sleeping for 3 seconds")
-            time.sleep(3)
-            return
-        #print(f"Attempting to save Tag ID: {str(self.count)}")
-        self.count += 1
-        if (self.count % 100) == 0:
-            self.loop.run_until_complete(self.save_current_count())
-        if tag.status_code == 404:
-            time.sleep(0.05)
-            #print(f"Non Existent")
-        elif tag.status_code == 200:
-            self.loop.run_until_complete(self.save_TagDB(tag.json()))
-            time.sleep(0.05)
-        else:
-            print(str(tag.status_code) + " failed. not sure why")
-            time.sleep(3)
+            await asyncio.sleep(3)
             return
 
-
-app = Flask(__name__)
-@app.route("/")	
-def home():
-	return {"status": "Alive"}
-
-def run():
-    app.run(host="0.0.0.0", port=8080)
-
-server = Thread(target=run)
-server.start()
-
-async def keep_alive():
-    while 1:
-        urllib.request.urlopen("https://Dataminer.tagscript1.repl.co")
-        await asyncio.sleep(200)
-
-keep_alive()
 
 miner = TagscriptMiner()
-print(f"Starting miner.\n Continuing at Tag ID: {miner.count}")
 
-while True:
-    miner.store_data()
+loop.run_until_complete(miner.start())
