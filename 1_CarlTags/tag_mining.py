@@ -28,6 +28,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import aiohttp
 from dotenv import load_dotenv
+from colorama import Style, Fore
 
 load_dotenv()
 
@@ -97,14 +98,14 @@ class TagscriptMiner:
             "deleted": False,
         }
         result = await self.TAGDB.insert_one(document)
-        print(f"Saved Tag ID: {repr(result.inserted_id)} to database")
+        print(f"Saved Tag ID: {Fore.CYAN}{repr(result.inserted_id)}{Style.RESET_ALL}")
 
     async def save_current_count(self):
         """Save the current count"""
         config = self.MONGODB["TagDB"]["Config"]
-        print(f"Saved count at Tag ID: {self.count}")
+        print(f"Config count saved at Tag ID: {Fore.BLUE}{self.count}{Style.RESET_ALL}")
         doc_amount = await self.TAGDB.count_documents({})
-        print(f"Current Amount of Tags Saved in Database: {doc_amount:,} (+{doc_amount - self.doc_amount} Tags)")
+        print(f"Tags Saved: {Fore.MAGENTA}{doc_amount:,}{Style.RESET_ALL} ({Fore.GREEN}+ {doc_amount - self.doc_amount}{Style.RESET_ALL} Tags)")
         self.doc_amount = doc_amount
         await config.update_one({"config": "config"}, {"$set": {"count": self.count}})
 
@@ -115,7 +116,7 @@ class TagscriptMiner:
             async with ses.get(self.api_url + str(self.count)) as tag:
                 #print(f"Attempting to save Tag ID: {str(self.count)}")
                 self.count += 1
-                if (self.count % 100) == 0:
+                if (self.count % 500) == 0:
                     loop.create_task(self.save_current_count())
                 if tag.status == 404:
                     await asyncio.sleep(0.05)
@@ -124,13 +125,13 @@ class TagscriptMiner:
                     loop.create_task(self.save_TagDB(await tag.json()))
                     await asyncio.sleep(0.05)
                 else:
-                    print(str(tag.status) + " failed. not sure why")
+                    print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
                     await asyncio.sleep(3)
                     return
 
         except:
             # if for some reason something goes wrong when requesting
-            print("Encountered 104, sleeping for 3 seconds")
+            print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
             await asyncio.sleep(3)
             return
 
