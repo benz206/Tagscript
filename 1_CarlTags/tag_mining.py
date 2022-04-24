@@ -53,16 +53,20 @@ Tag Schema
 }
 """
 
+
 async def get_current_tag_id(MONGODB):
     """Get the current tags id"""
     tag = await MONGODB["TagDB"]["Config"].find_one({"config": "config"})
-    return(int(tag.get("count")))
+    return int(tag.get("count"))
+
 
 async def get_current_doc_amount(TAGDB):
     """Get the current docs amount"""
     return await TAGDB.count_documents({})
 
+
 loop = asyncio.get_event_loop()
+
 
 class TagscriptMiner:
     """Mining and tracking tag information"""
@@ -73,11 +77,11 @@ class TagscriptMiner:
         self.MONGODB = AsyncIOMotorClient(connection_string)
         self.TAGDB = self.MONGODB["TagDB"]["Tags"]
 
-        print("Connected to DB")
+        print(f"{Fore.GREEN}Connected to DB{Style.RESET_ALL}")
 
     async def start(self) -> None:
         """Start the bot"""
-                    
+
         self.count = await get_current_tag_id(self.MONGODB)
         self.doc_amount = await get_current_doc_amount(self.TAGDB)
 
@@ -85,7 +89,6 @@ class TagscriptMiner:
         async with aiohttp.ClientSession() as ses:
             while True:
                 await self.store_data(ses)
-
 
     async def save_TagDB(self, data: dict) -> None:
         """Save a tags data to our db"""
@@ -112,22 +115,23 @@ class TagscriptMiner:
         config = self.MONGODB["TagDB"]["Config"]
         print(f"Config count saved at Tag ID: {Fore.BLUE}{self.count}{Style.RESET_ALL}")
         doc_amount = await self.TAGDB.count_documents({})
-        print(f"Tags Saved: {Fore.MAGENTA}{doc_amount:,}{Style.RESET_ALL} ({Fore.GREEN}+ {doc_amount - self.doc_amount}{Style.RESET_ALL} Tags)")
+        print(
+            f"Tags Saved: {Fore.MAGENTA}{doc_amount:,}{Style.RESET_ALL} ({Fore.GREEN}+ {doc_amount - self.doc_amount}{Style.RESET_ALL} Tags)"
+        )
         self.doc_amount = doc_amount
         await config.update_one({"config": "config"}, {"$set": {"count": self.count}})
-
 
     async def store_data(self, ses):
         """The function to start storing the data"""
         try:
             async with ses.get(self.api_url + str(self.count)) as tag:
-                #print(f"Attempting to save Tag ID: {str(self.count)}")
+                # print(f"Attempting to save Tag ID: {str(self.count)}")
                 self.count += 1
                 if (self.count % 500) == 0:
                     loop.create_task(self.save_current_count())
                 if tag.status == 404:
                     await asyncio.sleep(0.05)
-                    #print(f"Non Existent")
+                    # print(f"Non Existent")
                 elif tag.status == 200:
                     loop.create_task(self.save_TagDB(await tag.json()))
                     await asyncio.sleep(0.05)

@@ -17,11 +17,8 @@ connection_string = f"mongodb+srv://{os.environ['Mongo_User']}:{os.environ['Mong
 MONGODB = AsyncIOMotorClient(connection_string)
 TAGDB = MONGODB["TagDB"]["Tags"]
 
-limiter = Limiter(
-    app,
-    key_func=get_remote_address,
-    default_limits=["50 per second"]
-)
+limiter = Limiter(app, key_func=get_remote_address, default_limits=["50 per second"])
+
 
 @app.route("/update/<int:tagid>")
 @limiter.limit("1 per day")
@@ -33,14 +30,17 @@ def update(tagid):
     """
     return {"Status": "Not finished"}
 
+
 @app.route("/medium")
 @limiter.limit("1/second", override_defaults=False)
 def medium():
     return ":|"
 
+
 @app.route("/fast")
 def fast():
     return ":)"
+
 
 @app.route("/ping")
 @limiter.exempt
