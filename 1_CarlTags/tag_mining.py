@@ -104,7 +104,7 @@ class TagscriptMiner:
             "deleted": False,
         }
         quick_query = {"_id": data.get("id")}
-        result = await self.TAGDB.replace_one(quick_query, document, True)
+        await self.TAGDB.replace_one(quick_query, document, True)
         print(f"Saved Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}")
 
     async def save_current_count(self):
