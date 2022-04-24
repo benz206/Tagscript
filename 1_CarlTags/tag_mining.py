@@ -15,6 +15,8 @@ nsfw
 owner_id
 sharer (Basically the same as owner_id id unless the person who shared it isn't the same)
 uses
+content
+embed
 
 Everyone. Will be able to access the data
 Everyone. Is already able to access the data through the above endpoint
@@ -39,11 +41,15 @@ Tag Schema
     _id: tag_id,
     created_at: created_at,
     guild_id: location_id,
-    tag_name: name, # cut down to 25 characters max
+    tag_name: name,
     nsfw: true/false,
     owner_id: owner_id,
     sharer: shared_id,
-    uses: int
+    uses: int,
+    "content": content,
+    "embed": embed,
+    "last_fetched": last_fetched,
+    "deleted": deleted,
 }
 """
 
@@ -97,7 +103,8 @@ class TagscriptMiner:
             "last_fetched": datetime.datetime.utcnow(),
             "deleted": False,
         }
-        result = await self.TAGDB.insert_one(document)
+        quick_query = {"_id": data.get("id")}
+        result = await self.TAGDB.replace_one(quick_query, document, True)
         print(f"Saved Tag ID: {Fore.CYAN}{repr(result.inserted_id)}{Style.RESET_ALL}")
 
     async def save_current_count(self):
