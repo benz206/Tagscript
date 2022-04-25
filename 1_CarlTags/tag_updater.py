@@ -161,12 +161,10 @@ class Turtle:
 
                 elif tag.status == 200:
                     data = await tag.json()
-
-                    check = data.pop("deleted", None).pop("last_fetched", None)
-                    tag = (await self.TAGDB.find_one({"_id": int(_id)})).pop("deleted", None).pop("last_fetched", None)
+                    tag = await self.TAGDB.find_one({"_id": int(_id)})
                     
-                    if check == tag:
-                        loop.create_task(self.TAGDB.update_one({"_id": int(_id)}, {"$set": {"last_fetched": datetime.datetime.utcnow()}}))
+                    if data.get("id") == tag.get("_id") and data.get("created_at") == tag.get("created_at") and data.get("location_id") == tag.get("guild_id") and data.get("name") == tag.get("tag_name") and data.get("nsfw") == tag.get("nsfw") and data.get("owner_id") == tag.get("owner_id") and data.get("sharer") == tag.get("sharer") and data.get("uses") == tag.get("uses") and data.get("content") == tag.get("content") and data.get("embed") == tag.get("embed"):
+                        await self.TAGDB.update_one({"_id": int(_id)}, {"$set": {"last_fetched": datetime.datetime.utcnow()}})
                     
                     else:
                         document = {
@@ -184,7 +182,7 @@ class Turtle:
                             "deleted": False,
                         }
                         quick_query = {"_id": data.get("id")}
-                        loop.create_task(self.TAGDB.replace_one(quick_query, document, True))
+                        await self.TAGDB.replace_one(quick_query, document, True)
                         self.hook.ftl_updates.append(str(_id))
                         print(
                             f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
@@ -200,7 +198,6 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
 ```
 ```py
 {e}
-```
 """
             ))
             return
@@ -231,7 +228,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                         "deleted": False,
                     }
                     quick_query = {"_id": data.get("id")}
-                    loop.create_task(self.TAGDB.replace_one(quick_query, document, True))
+                    await self.TAGDB.replace_one(quick_query, document, True)
                     self.hook.rtl_updates.append(str(_id))
                     print(
                         f"Found new tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
