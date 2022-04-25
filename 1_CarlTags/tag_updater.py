@@ -76,7 +76,7 @@ class FishHook:
         """
         Send an update to ftl if needed
         """
-        if index % 1500 == 0:
+        if index % 500 == 0:
             webhook = DiscordWebhook(
                 url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
                 rate_limit_retry=True,
@@ -145,7 +145,7 @@ class Turtle:
 
         print(f"Starting turtle.")
         async with aiohttp.ClientSession() as ses:
-            loop.create_task(self.recon_tag_loop(ses))
+            loop.create_task(self.full_tag_loop(ses))
             await self.recon_tag_loop(ses)
 
     async def rs_TAGDB(self, _id, ses) -> None:
@@ -258,12 +258,12 @@ class Turtle:
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("_id")
 
-            async for i in async_range(1, 1500):
+            async for i in async_range(1, 500):
                 self.rtlc += 1
                 loop.create_task(self.hook.update_rtl(self.rtlc, latest))
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
-                await asyncio.sleep(1.0)
+                await asyncio.sleep(0.5)
 
 
 turtle = Turtle()
