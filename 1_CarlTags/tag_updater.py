@@ -249,13 +249,13 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
         Full tag loop, reupdates all tags
         """
         while True:
-            loop.create_task(self.hook.start_msg("FTL"))
+            loop.create_task(self.hook.start_msg("Full Tag Loop"))
             self.ftlc = 0
 
             async for tag in self.TAGDB.find({"deleted": False}):
                 self.ftlc += 1
                 loop.create_task(self.rs_TAGDB(tag.get("_id"), ses))
-                await asyncio.sleep(3.0)
+                await asyncio.sleep(1.5)
 
             loop.create_task(self.hook.update_ftl())
 
@@ -264,7 +264,6 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
         Recon for new tags, will continuosly search for more tags
         """
         while True:
-            loop.create_task(self.hook.start_msg("RTL"))
             self.rtlc = 0
             cursor = self.TAGDB.find({}).sort("_id", -1)
             for tag in await cursor.to_list(length=1):
@@ -274,7 +273,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                 self.rtlc += 1
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.3)
 
             loop.create_task(self.hook.update_rtl(latest))
 
