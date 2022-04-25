@@ -266,7 +266,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("_id")
 
-            async for i in async_range(1, 500):
+            async for i in async_range(1, 2000):
                 self.rtlc += 1
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
