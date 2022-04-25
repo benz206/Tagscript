@@ -189,7 +189,7 @@ class Turtle:
                         )
                 else:
                     #print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
-                    await asyncio.sleep(5.0)
+                    await asyncio.sleep(7.5)
                     loop.create_task(self.rs_TAGDB(_id, ses))
         except Exception as e:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
@@ -235,7 +235,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                     )
                 else:
                     #print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
-                    await asyncio.sleep(5.0)
+                    await asyncio.sleep(7.5)
                     loop.create_task(self.s_TAGDB(_id, ses))
         except:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
