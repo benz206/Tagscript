@@ -183,9 +183,6 @@ class Turtle:
                     )
                 else:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
-                    loop.create_task(self.hook.error(
-                        f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}"
-                    ))
                     await asyncio.sleep(5.0)
                     loop.create_task(self.rs_TAGDB(_id, ses))
         except:
@@ -228,9 +225,6 @@ class Turtle:
                     )
                 else:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
-                    loop.create_task(self.hook.error(
-                        f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}"
-                    ))
                     await asyncio.sleep(5.0)
                     loop.create_task(self.s_TAGDB(_id, ses))
         except:
