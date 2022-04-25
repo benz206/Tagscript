@@ -33,13 +33,13 @@ async def get_current_doc_amount(TAGDB):
     """Get the current docs amount"""
     return await TAGDB.count_documents({})
 
+
 async def async_range(x, y) -> int:
     """
     async range
     """
     for i in range(x, y):
-        yield(i)
-
+        yield (i)
 
 
 class FishHook:
@@ -50,19 +50,20 @@ class FishHook:
     def __init__(self) -> None:
         self.ftl_updates = []
         self.rtl_updates = []
-        self.ftl_errors = []
-        self.rtl_errors = []
-    
+
     async def update_ftl(self, index: int) -> None:
         """
         Send an update to ftl if needed
         """
         if index % 1000 == 0:
-            webhook = DiscordWebhook(url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}", rate_limit_retry=True)
+            webhook = DiscordWebhook(
+                url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+                rate_limit_retry=True,
+            )
             visual = f"{Style.RESET_ALL}\n{Fore.MAGENTA}".join(self.ftl_updates)
-                
+
             webhook.set_content(
-f"""```ansi
+                f"""```ansi
 {Fore.RED}{len(self.ftl_updates)} tags have been deleted.{Style.RESET_ALL}
 {visual}
 ```"""
@@ -76,11 +77,14 @@ f"""```ansi
         Send an update to ftl if needed
         """
         if index % 1500 == 0:
-            webhook = DiscordWebhook(url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}", rate_limit_retry=True)
+            webhook = DiscordWebhook(
+                url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+                rate_limit_retry=True,
+            )
             visual = f"{Style.RESET_ALL}\n{Fore.BLUE}".join(self.ftl_updates)
-                
+
             webhook.set_content(
-f"""```ansi
+                f"""```ansi
 {Fore.GREEN}{len(self.ftl_updates)} tags have been found.{Style.RESET_ALL}{Fore.MAGENTA}{str(rrange):,}-{str(rrange + 1500):,}{Style.RESET_ALL}
 {visual}
 ```"""
@@ -93,29 +97,34 @@ f"""```ansi
         """
         Start the ftl/rtl
         """
-        webhook = DiscordWebhook(url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}", rate_limit_retry=True)
-        webhook.add_embed(DiscordEmbed(
-            title=f"Starting {msg}",
-            color="00FF00"
-        ))
+        webhook = DiscordWebhook(
+            url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+            rate_limit_retry=True,
+        )
+        webhook.add_embed(DiscordEmbed(title=f"Starting {msg}", color="00FF00"))
         webhook.execute()
-    
+
     async def error(self, msg) -> None:
         """
         When an error occurs
         """
-        webhook = DiscordWebhook(url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}", rate_limit_retry=True)
-        webhook.add_embed(DiscordEmbed(
-            title=f"Error",
-            description=f"""```ansi
+        webhook = DiscordWebhook(
+            url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+            rate_limit_retry=True,
+        )
+        webhook.add_embed(
+            DiscordEmbed(
+                title=f"Error",
+                description=f"""```ansi
 {msg}
 ```""",
-            color="FF0000"
-        ))
+                color="FF0000",
+            )
+        )
         webhook.execute()
 
 
-class Turtle:  
+class Turtle:
     """
     This is for carl so why not call it turtle"""
 
@@ -138,7 +147,6 @@ class Turtle:
         async with aiohttp.ClientSession() as ses:
             loop.create_task(self.recon_tag_loop(ses))
             await self.recon_tag_loop(ses)
-                
 
     async def rs_TAGDB(self, _id, ses) -> None:
         """
@@ -147,7 +155,9 @@ class Turtle:
         try:
             async with ses.get(self.api_url + str(_id)) as tag:
                 if tag.status == 404:
-                    await self.TAGDB.update_one({"_id": int(_id)}, {"$set": {"deleted": True}})
+                    await self.TAGDB.update_one(
+                        {"_id": int(_id)}, {"$set": {"deleted": True}}
+                    )
 
                 elif tag.status == 200:
                     data = await tag.json()
@@ -168,13 +178,21 @@ class Turtle:
                     quick_query = {"_id": data.get("id")}
                     await self.TAGDB.replace_one(quick_query, document, True)
                     self.hook.ftl_updates.append(str(_id))
-                    print(f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}")
+                    print(
+                        f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
+                    )
                 else:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
+                    await self.hook.error(
+                        f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}"
+                    )
                     await asyncio.sleep(5.0)
                     loop.create_task(self.rs_TAGDB(_id, ses))
         except:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
+            await self.hook.error(
+                f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}"
+            )
             return
 
     async def s_TAGDB(self, _id, ses) -> None:
@@ -205,15 +223,22 @@ class Turtle:
                     quick_query = {"_id": data.get("id")}
                     await self.TAGDB.replace_one(quick_query, document, True)
                     self.hook.rtl_updates.append(str(_id))
-                    print(f"Found new tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}")
+                    print(
+                        f"Found new tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
+                    )
                 else:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
+                    await self.hook.error(
+                        f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}"
+                    )
                     await asyncio.sleep(5.0)
                     loop.create_task(self.s_TAGDB(_id, ses))
         except:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
+            await self.hook.error(
+                f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}"
+            )
             return
-
 
     async def full_tag_loop(self, ses) -> None:
         """
@@ -245,7 +270,6 @@ class Turtle:
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
                 await asyncio.sleep(1.0)
-                
 
 
 turtle = Turtle()
