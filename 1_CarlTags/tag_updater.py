@@ -68,7 +68,7 @@ class FishHook:
 {visual}
 ```"""
             )
-
+            self.ftl_updates = []
             webhook.execute()
         return
 
@@ -81,15 +81,15 @@ class FishHook:
                 url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
                 rate_limit_retry=True,
             )
-            visual = f"{Style.RESET_ALL}\n{Fore.BLUE}".join(self.ftl_updates)
+            visual = f"{Style.RESET_ALL}\n{Fore.BLUE}".join(self.rtl_updates)
 
             webhook.set_content(
                 f"""```ansi
-{Fore.GREEN}{len(self.ftl_updates)} tags have been found.{Style.RESET_ALL}{Fore.MAGENTA}{str(rrange)}-{str(rrange + 1500)}{Style.RESET_ALL}
+{Fore.GREEN}{len(self.rtl_updates)} tags have been found.{Style.RESET_ALL}{Fore.MAGENTA}{str(rrange)}-{str(rrange + 1500)}{Style.RESET_ALL}
 {visual}
 ```"""
             )
-
+            self.rtl_updates = []
             webhook.execute()
         return
 
