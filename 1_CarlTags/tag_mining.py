@@ -31,6 +31,7 @@ import os
 import aiohttp
 from dotenv import load_dotenv
 from colorama import Style, Fore
+import sys
 
 load_dotenv()
 
@@ -127,6 +128,8 @@ class TagscriptMiner:
             async with ses.get(self.api_url + str(self.count)) as tag:
                 # print(f"Attempting to save Tag ID: {str(self.count)}")
                 self.count += 1
+                if self.count > 1400000:
+                    sys.exit("Finished")
                 if (self.count % 500) == 0:
                     loop.create_task(self.save_current_count())
                 if tag.status == 404:
