@@ -29,11 +29,6 @@ load_dotenv()
 loop = asyncio.get_event_loop()
 
 
-async def get_current_doc_amount(TAGDB):
-    """Get the current docs amount"""
-    return await TAGDB.count_documents({})
-
-
 async def async_range(x, y) -> int:
     """
     async range
@@ -145,8 +140,6 @@ class Turtle:
         """
         Start the Turtle
         """
-        self.doc_amount = await get_current_doc_amount(self.TAGDB)
-
         print(f"Starting turtle.")
         async with aiohttp.ClientSession() as ses:
             loop.create_task(self.full_tag_loop(ses))
@@ -255,9 +248,9 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
         while True:
             loop.create_task(self.hook.start_msg("Full Tag Loop"))
             self.ftlc = 0
-
             async for tag in self.TAGDB.find({"deleted": False}):
                 self.ftlc += 1
+
                 loop.create_task(self.rs_TAGDB(tag.get("_id"), ses))
                 await asyncio.sleep(1.5)
 
