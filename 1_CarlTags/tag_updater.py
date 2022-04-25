@@ -163,7 +163,7 @@ class Turtle:
                     data = await tag.json()
 
                     check = data.pop("deleted", None).pop("last_fetched", None)
-                    tag = (loop.create_task(self.TAGDB.find_one({"_id": int(_id)}))).pop("deleted", None).pop("last_fetched", None)
+                    tag = (await self.TAGDB.find_one({"_id": int(_id)})).pop("deleted", None).pop("last_fetched", None)
                     
                     if check == tag:
                         loop.create_task(self.TAGDB.update_one({"_id": int(_id)}, {"$set": {"last_fetched": datetime.datetime.utcnow()}}))
@@ -197,6 +197,7 @@ class Turtle:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
             loop.create_task(self.hook.error(
 f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
+```
 ```py
 {e}
 ```
@@ -230,7 +231,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                         "deleted": False,
                     }
                     quick_query = {"_id": data.get("id")}
-                    await self.TAGDB.replace_one(quick_query, document, True)
+                    loop.create_task(self.TAGDB.replace_one(quick_query, document, True))
                     self.hook.rtl_updates.append(str(_id))
                     print(
                         f"Found new tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
