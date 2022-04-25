@@ -79,13 +79,17 @@ class FishHook:
             url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
             rate_limit_retry=True,
         )
-        visual = f"\n".join(self.rtl_updates)
+        visual = f"\n- ".join(self.rtl_updates)
+        if self.rtl_updates:
+            ns_range = f"{self.rtl_updates[-1]:,}-{(self.rtl_updates[-1] + 1500):,}"
+        else:
+            ns_range = "No new tags were found."
 
         webhook.set_content(
             f"""```ansi
 {Fore.GREEN}{len(self.rtl_updates)} tags have been found.
 {Fore.MAGENTA}Old Search Range: {rrange:,}-{(rrange + 1500):,}
-{Fore.RED}New Search Range: {self.rtl_updates[-1]:,}-{(self.rtl_updates[-1] + 1500):,}
+{Fore.RED}New Search Range: {ns_range}
 {Fore.BLUE}{visual}
 ```"""
         )
