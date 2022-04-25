@@ -230,14 +230,14 @@ class Turtle:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
                     loop.create_task(self.hook.error(
                         f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}"
-                    )
+                    ))
                     await asyncio.sleep(5.0)
                     loop.create_task(self.s_TAGDB(_id, ses))
         except:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
             loop.create_task(self.hook.error(
                 f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}"
-            )
+            ))
             return
 
     async def full_tag_loop(self, ses) -> None:
