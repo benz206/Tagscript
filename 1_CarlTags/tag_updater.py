@@ -161,26 +161,34 @@ class Turtle:
 
                 elif tag.status == 200:
                     data = await tag.json()
-                    document = {
-                        "_id": data.get("id"),
-                        "created_at": data.get("created_at", None),
-                        "guild_id": data.get("location_id", None),
-                        "tag_name": data.get("name"),
-                        "nsfw": data.get("nsfw", None),
-                        "owner_id": data.get("owner_id", None),
-                        "sharer": data.get("sharer", None),
-                        "uses": data.get("uses", 0),
-                        "content": data.get("content", ""),
-                        "embed": data.get("embed", ""),
-                        "last_fetched": datetime.datetime.utcnow(),
-                        "deleted": False,
-                    }
-                    quick_query = {"_id": data.get("id")}
-                    await self.TAGDB.replace_one(quick_query, document, True)
-                    self.hook.ftl_updates.append(str(_id))
-                    print(
-                        f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
-                    )
+
+                    check = data.pop("deleted", None).pop("last_fetched", None)
+                    tag = (loop.create_task(self.TAGDB.find_one({"_id": int(_id)}))).pop("deleted", None).pop("last_fetched", None)
+                    
+                    if check == tag:
+                        loop.create_task(self.TAGDB.update_one({"_id": int(_id)}, {"$set": {"last_fetched": datetime.datetime.utcnow()}}))
+                    
+                    else:
+                        document = {
+                            "_id": data.get("id"),
+                            "created_at": data.get("created_at", None),
+                            "guild_id": data.get("location_id", None),
+                            "tag_name": data.get("name"),
+                            "nsfw": data.get("nsfw", None),
+                            "owner_id": data.get("owner_id", None),
+                            "sharer": data.get("sharer", None),
+                            "uses": data.get("uses", 0),
+                            "content": data.get("content", ""),
+                            "embed": data.get("embed", ""),
+                            "last_fetched": datetime.datetime.utcnow(),
+                            "deleted": False,
+                        }
+                        quick_query = {"_id": data.get("id")}
+                        loop.create_task(self.TAGDB.replace_one(quick_query, document, True))
+                        self.hook.ftl_updates.append(str(_id))
+                        print(
+                            f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
+                        )
                 else:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
                     await asyncio.sleep(5.0)
