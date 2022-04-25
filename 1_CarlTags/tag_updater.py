@@ -183,16 +183,16 @@ class Turtle:
                     )
                 else:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
-                    await self.hook.error(
+                    loop.create_task(self.hook.error(
                         f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}"
-                    )
+                    ))
                     await asyncio.sleep(5.0)
                     loop.create_task(self.rs_TAGDB(_id, ses))
         except:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
-            await self.hook.error(
+            loop.create_task(self.hook.error(
                 f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}"
-            )
+            ))
             return
 
     async def s_TAGDB(self, _id, ses) -> None:
@@ -228,14 +228,14 @@ class Turtle:
                     )
                 else:
                     print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
-                    await self.hook.error(
+                    loop.create_task(self.hook.error(
                         f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}"
                     )
                     await asyncio.sleep(5.0)
                     loop.create_task(self.s_TAGDB(_id, ses))
         except:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
-            await self.hook.error(
+            loop.create_task(self.hook.error(
                 f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}"
             )
             return
