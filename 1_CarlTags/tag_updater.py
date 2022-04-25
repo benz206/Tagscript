@@ -85,7 +85,7 @@ class FishHook:
 
             webhook.set_content(
                 f"""```ansi
-{Fore.GREEN}{len(self.rtl_updates)} tags have been found.{Style.RESET_ALL}{Fore.MAGENTA}{str(rrange)}-{str(rrange + 1500)}{Style.RESET_ALL}
+{Fore.GREEN}{len(self.rtl_updates)} tags have been found.{Style.RESET_ALL} {Fore.MAGENTA}{str(rrange)}-{str(rrange + 1500)}{Style.RESET_ALL}
 {visual}
 ```"""
             )
