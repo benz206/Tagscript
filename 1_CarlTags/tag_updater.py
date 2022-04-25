@@ -51,46 +51,44 @@ class FishHook:
         self.ftl_updates = []
         self.rtl_updates = []
 
-    async def update_ftl(self, index: int) -> None:
+    async def update_ftl(self) -> None:
         """
         Send an update to ftl if needed
         """
-        if index % 1000 == 0:
-            webhook = DiscordWebhook(
-                url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
-                rate_limit_retry=True,
-            )
-            visual = f"{Style.RESET_ALL}\n{Fore.MAGENTA}".join(self.ftl_updates)
+        webhook = DiscordWebhook(
+            url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+            rate_limit_retry=True,
+        )
+        visual = f"{Style.RESET_ALL}\n{Fore.MAGENTA}".join(self.ftl_updates)
 
-            webhook.set_content(
-                f"""```ansi
+        webhook.set_content(
+            f"""```ansi
 {Fore.RED}{len(self.ftl_updates)} tags have been deleted.{Style.RESET_ALL}
 {visual}
 ```"""
-            )
-            self.ftl_updates = []
-            webhook.execute()
+        )
+        self.ftl_updates = []
+        webhook.execute()
         return
 
-    async def update_rtl(self, index: int, rrange) -> None:
+    async def update_rtl(self, rrange) -> None:
         """
         Send an update to ftl if needed
         """
-        if index % 500 == 0:
-            webhook = DiscordWebhook(
-                url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
-                rate_limit_retry=True,
-            )
-            visual = f"{Style.RESET_ALL}\n{Fore.BLUE}".join(self.rtl_updates)
+        webhook = DiscordWebhook(
+            url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+            rate_limit_retry=True,
+        )
+        visual = f"{Style.RESET_ALL}\n{Fore.BLUE}".join(self.rtl_updates)
 
-            webhook.set_content(
-                f"""```ansi
+        webhook.set_content(
+            f"""```ansi
 {Fore.GREEN}{len(self.rtl_updates)} tags have been found.{Style.RESET_ALL} {Fore.MAGENTA}{str(rrange)}-{str(rrange + 1500)}{Style.RESET_ALL}
 {visual}
 ```"""
-            )
-            self.rtl_updates = []
-            webhook.execute()
+        )
+        self.rtl_updates = []
+        webhook.execute()
         return
 
     async def start_msg(self, msg) -> None:
@@ -251,11 +249,13 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
         while True:
             loop.create_task(self.hook.start_msg("FTL"))
             self.ftlc = 0
+
             async for tag in self.TAGDB.find({"deleted": False}):
                 self.ftlc += 1
-                loop.create_task(self.hook.update_ftl(self.ftlc))
                 loop.create_task(self.rs_TAGDB(tag.get("_id"), ses))
                 await asyncio.sleep(3.0)
+
+            loop.create_task(self.hook.update_ftl())
 
     async def recon_tag_loop(self, ses) -> None:
         """
@@ -270,11 +270,11 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
 
             async for i in async_range(1, 500):
                 self.rtlc += 1
-                loop.create_task(self.hook.update_rtl(self.rtlc, latest))
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
                 await asyncio.sleep(0.5)
 
+            loop.create_task(self.hook.update_rtl(latest))
 
 turtle = Turtle()
 
