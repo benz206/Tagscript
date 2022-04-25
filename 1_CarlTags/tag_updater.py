@@ -188,7 +188,7 @@ class Turtle:
                             f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
                         )
                 else:
-                    print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
+                    #print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
                     await asyncio.sleep(5.0)
                     loop.create_task(self.rs_TAGDB(_id, ses))
         except Exception as e:
@@ -234,7 +234,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                         f"Found new tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
                     )
                 else:
-                    print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
+                    #print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
                     await asyncio.sleep(5.0)
                     loop.create_task(self.s_TAGDB(_id, ses))
         except:
