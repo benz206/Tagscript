@@ -160,7 +160,7 @@ class Turtle:
                     data = await tag.json()
                     tag = await self.TAGDB.find_one({"_id": int(_id)})
                     
-                    if data.get("id") == tag.get("_id") and data.get("created_at") == tag.get("created_at") and data.get("location_id") == tag.get("guild_id") and data.get("name") == tag.get("tag_name") and data.get("nsfw") == tag.get("nsfw") and data.get("owner_id") == tag.get("owner_id") and data.get("sharer") == tag.get("sharer") and data.get("uses") == tag.get("uses") and data.get("content") == tag.get("content") and data.get("embed") == tag.get("embed"):
+                    if data.get("id") == tag.get("_id") and data.get("location_id") == tag.get("guild_id") and data.get("name") == tag.get("tag_name") and data.get("nsfw") == tag.get("nsfw") and data.get("owner_id") == tag.get("owner_id") and data.get("sharer") == tag.get("sharer") and data.get("uses") == tag.get("uses") and data.get("content") == tag.get("content") and data.get("embed") == tag.get("embed"):
                         await self.TAGDB.update_one({"_id": int(_id)}, {"$set": {"last_fetched": datetime.datetime.utcnow()}})
                     
                     else:
