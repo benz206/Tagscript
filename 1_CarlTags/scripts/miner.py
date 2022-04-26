@@ -95,8 +95,8 @@ class TagscriptMiner:
         """Save a tags data to our db"""
         document = {
             "_id": data.get("id"),
-            "created_at": data.get("created_at", None),
-            "guild_id": data.get("location_id", None),
+            "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT").now(),
+            "guild_id": str(data.get("location_id", None)),
             "tag_name": data.get("name"),
             "nsfw": data.get("nsfw", None),
             "owner_id": data.get("owner_id", None),
