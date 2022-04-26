@@ -76,7 +76,7 @@ class FishHook:
         )
         visual = f"\n- ".join(self.rtl_updates)
         if self.rtl_updates:
-            ns_range = f"{(self.rtl_updates[-1]):,}-{(self.rtl_updates[-1] + 1500):,}"
+            ns_range = f"{(self.rtl_updates[-1])}-{(self.rtl_updates[-1] + 1500)}"
         else:
             ns_range = "No new tags were found."
 
