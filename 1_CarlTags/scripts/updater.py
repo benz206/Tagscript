@@ -166,7 +166,7 @@ class Turtle:
                     else:
                         document = {
                             "_id": data.get("id"),
-                            "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT").now(),
+                            "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"),
                             "guild_id": str(data.get("location_id", None)),
                             "tag_name": data.get("name"),
                             "nsfw": data.get("nsfw", None),
@@ -212,7 +212,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                     data = await tag.json()
                     document = {
                         "_id": data.get("id"),
-                        "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT").now(),
+                        "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"),
                         "guild_id": str(data.get("location_id", None)),
                         "tag_name": data.get("name"),
                         "nsfw": data.get("nsfw", None),
