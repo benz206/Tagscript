@@ -177,6 +177,8 @@ class Turtle:
                             "embed": data.get("embed", ""),
                             "last_fetched": datetime.datetime.utcnow(),
                             "deleted": False,
+                            "description": data.get("description", None),
+                            "restricted": data.get("restricted", False)
                         }
                         quick_query = {"_id": data.get("id")}
                         await self.TAGDB.replace_one(quick_query, document, True)
@@ -223,6 +225,8 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                         "embed": data.get("embed", ""),
                         "last_fetched": datetime.datetime.utcnow(),
                         "deleted": False,
+                        "description": data.get("description", None),
+                        "restricted": data.get("restricted", False)
                     }
                     quick_query = {"_id": data.get("id")}
                     await self.TAGDB.replace_one(quick_query, document, True)
