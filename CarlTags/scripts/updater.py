@@ -45,6 +45,7 @@ class FishHook:
     def __init__(self) -> None:
         self.ftl_updates = []
         self.rtl_updates = []
+        self.rtl_loops = 0
 
     async def update_ftl(self) -> None:
         """
@@ -66,9 +67,9 @@ class FishHook:
         webhook.execute()
         return
 
-    async def update_rtl(self, rrange) -> None:
+    async def update_rtl(self, rrange: int) -> None:
         """
-        Send an update to ftl if needed
+        Send an update to our webhook when we want one
         """
         webhook = DiscordWebhook(
             url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
@@ -76,32 +77,22 @@ class FishHook:
         )
         visual = f"\n- ".join(self.rtl_updates)
         if self.rtl_updates:
-            ns_range = f"{self.rtl_updates[-1]}-{int(self.rtl_updates[-1]) + 1500}"
-        else:
-            ns_range = "No new tags were found."
+            webhook.set_content(
+                f"""```ansi
+{Fore.GREEN}{len(self.rtl_updates)} tag(s) have been found. ( {self.rtl_loops} loops have completed since last search )
 
-        webhook.set_content(
-            f"""```ansi
-{Fore.GREEN}{len(self.rtl_updates)} tags have been found.
 {Fore.MAGENTA}Old Search Range: {rrange:,}-{(rrange + 1500):,}
-{Fore.RED}New Search Range: {ns_range}
-{Fore.BLUE}{visual}
-```"""
-        )
-        self.rtl_updates = []
-        webhook.execute()
-        return
+{Fore.YELLOW}New Search Range: {int(self.rtl_updates[-1]):,}-{(int(self.rtl_updates[-1]) + 1500):,}
 
-    async def start_msg(self, msg) -> None:
-        """
-        Start the ftl/rtl
-        """
-        webhook = DiscordWebhook(
-            url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
-            rate_limit_retry=True,
-        )
-        webhook.add_embed(DiscordEmbed(title=f"Starting {msg}", color="00FF00"))
-        webhook.execute()
+{Fore.BLUE}- {visual}
+```"""
+            )
+            self.rtl_updates = []
+            self.rtl_loops = 0
+            webhook.execute()
+            return
+        else:
+            self.rtl_loops += 1
 
     async def error(self, msg) -> None:
         """
@@ -159,14 +150,28 @@ class Turtle:
                 elif tag.status == 200:
                     data = await tag.json()
                     tag = await self.TAGDB.find_one({"_id": int(_id)})
-                    
-                    if data.get("id") == tag.get("_id") and data.get("name") == tag.get("tag_name") and data.get("nsfw") == tag.get("nsfw") and data.get("owner_id") == tag.get("owner_id") and data.get("sharer") == tag.get("sharer") and data.get("uses") == tag.get("uses") and data.get("content") == tag.get("content") and data.get("embed") == tag.get("embed"):
-                        await self.TAGDB.update_one({"_id": int(_id)}, {"$set": {"last_fetched": datetime.datetime.utcnow()}})
-                    
+
+                    if (
+                        data.get("id") == tag.get("_id")
+                        and data.get("name") == tag.get("tag_name")
+                        and data.get("nsfw") == tag.get("nsfw")
+                        and data.get("owner_id") == tag.get("owner_id")
+                        and data.get("sharer") == tag.get("sharer")
+                        and data.get("uses") == tag.get("uses")
+                        and data.get("content") == tag.get("content")
+                        and data.get("embed") == tag.get("embed")
+                    ):
+                        await self.TAGDB.update_one(
+                            {"_id": int(_id)},
+                            {"$set": {"last_fetched": datetime.datetime.utcnow()}},
+                        )
+
                     else:
                         document = {
                             "_id": data.get("id"),
-                            "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"),
+                            "created_at": datetime.datetime.strptime(
+                                data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"
+                            ),
                             "guild_id": str(data.get("location_id", None)),
                             "tag_name": data.get("name"),
                             "nsfw": data.get("nsfw", None),
@@ -178,7 +183,7 @@ class Turtle:
                             "last_fetched": datetime.datetime.utcnow(),
                             "deleted": False,
                             "description": data.get("description", None),
-                            "restricted": data.get("restricted", False)
+                            "restricted": data.get("restricted", False),
                         }
                         quick_query = {"_id": data.get("id")}
                         await self.TAGDB.replace_one(quick_query, document, True)
@@ -187,18 +192,20 @@ class Turtle:
                             f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
                         )
                 else:
-                    #print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
+                    # print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
                     await asyncio.sleep(7.5)
                     loop.create_task(self.rs_TAGDB(_id, ses))
         except Exception as e:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
-            loop.create_task(self.hook.error(
-f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
+            loop.create_task(
+                self.hook.error(
+                    f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
 ```
 ```py
 {e}
 """
-            ))
+                )
+            )
             return
 
     async def s_TAGDB(self, _id, ses) -> None:
@@ -214,7 +221,9 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                     data = await tag.json()
                     document = {
                         "_id": data.get("id"),
-                        "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"),
+                        "created_at": datetime.datetime.strptime(
+                            data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"
+                        ),
                         "guild_id": str(data.get("location_id", None)),
                         "tag_name": data.get("name"),
                         "nsfw": data.get("nsfw", None),
@@ -226,7 +235,7 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                         "last_fetched": datetime.datetime.utcnow(),
                         "deleted": False,
                         "description": data.get("description", None),
-                        "restricted": data.get("restricted", False)
+                        "restricted": data.get("restricted", False),
                     }
                     quick_query = {"_id": data.get("id")}
                     await self.TAGDB.replace_one(quick_query, document, True)
@@ -235,14 +244,14 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
                         f"Found new tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
                     )
                 else:
-                    #print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
+                    # print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
                     await asyncio.sleep(7.5)
                     loop.create_task(self.s_TAGDB(_id, ses))
         except:
             print(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
-            loop.create_task(self.hook.error(
-                f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}"
-            ))
+            loop.create_task(
+                self.hook.error(f"{Fore.RED}Encountered Random Error.{Style.RESET_ALL}")
+            )
             return
 
     async def full_tag_loop(self, ses) -> None:
@@ -250,7 +259,6 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
         Full tag loop, reupdates all tags
         """
         while True:
-            loop.create_task(self.hook.start_msg("Full Tag Loop"))
             self.ftlc = 0
             async for tag in self.TAGDB.find({"deleted": False}):
                 self.ftlc += 1
@@ -270,13 +278,14 @@ f"""{Fore.RED}Encountered Random Error.{Style.RESET_ALL}
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("_id")
 
-            async for i in async_range(1, 2000):
+            async for i in async_range(1, 3000):
                 self.rtlc += 1
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(0.1)
 
             loop.create_task(self.hook.update_rtl(latest))
+
 
 turtle = Turtle()
 
