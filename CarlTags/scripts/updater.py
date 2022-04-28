@@ -47,10 +47,10 @@ class FishHook:
 
         for i in range(round(len(self.ftl_updates) / 220) - 1):
             temp = []
-            for i in range(215): # Numer of ids we should be able to fit into the message
+            for i in range(220): # Numer of ids we should be able to fit into the message
                 try:
-                    temp.append(self.ftl_updates[i])
-                    self.ftl_updates.pop(i)
+                    temp.append(self.ftl_updates[0])
+                    self.ftl_updates.pop(0)
                     
                     webhook.set_content(
                         f"""```ansi
