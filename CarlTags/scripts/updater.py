@@ -42,16 +42,40 @@ class FishHook:
             url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
             rate_limit_retry=True,
         )
-        visual = f"{Style.RESET_ALL}\n{Fore.MAGENTA}".join(self.ftl_updates)
+        len_ftl = len(self.ftl_updates)
+        self.ftl_visual = []
 
+        for i in range(round(len(self.ftl_updates) / 220) - 1):
+            temp = []
+            for i in range(215): # Numer of ids we should be able to fit into the message
+                try:
+                    temp.append(self.ftl_updates[i])
+                    self.ftl_updates.pop(i)
+                    
+                    webhook.set_content(
+                        f"""```ansi
+{Fore.BLUE}{", ".join(temp)}{Style.RESET_ALL}
+```"""
+                    )
+                    webhook.execute()
+                except:
+                    pass
+                
+        if self.ftl_updates:
+            webhook.set_content(
+                f"""```ansi
+{Fore.BLUE}{", ".join(self.ftl_updates)}{Style.RESET_ALL}
+```"""
+            )
+            webhook.execute()
+        
         webhook.set_content(
-            f"""```ansi
-{Fore.RED}{len(self.ftl_updates)} tags have been deleted.{Style.RESET_ALL}
-{visual}
+            f""""```ansi
+{Fore.RED}{len_ftl} tags have been updated.{Style.RESET_ALL}
 ```"""
         )
-        self.ftl_updates = []
         webhook.execute()
+        self.ftl_updates = []
         return
 
     async def update_rtl(self, rrange: int) -> None:
