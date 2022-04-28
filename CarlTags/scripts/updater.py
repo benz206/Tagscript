@@ -12,19 +12,6 @@ from colorama import Style, Fore
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 
-"""
-My thought process on how this will work.
-
-With around 30k tags at this time of this making
-
-30,000 tags at 1 request per 3 seconds is around 24 hours. meaning every tag should be updated at least once day.
-
-The Turtle will get the last 1,500 (Most we've gone without a tag found in recent searches is around 500)
-
-1,500 at 1 second each is around 25 minutes meaning we should have a 25 minute window to not miss the latest tag created.
-
-"""
-
 load_dotenv()
 loop = asyncio.get_event_loop()
 
