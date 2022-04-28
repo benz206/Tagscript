@@ -244,14 +244,20 @@ class Turtle:
     async def full_tag_loop(self, ses) -> None:
         """
         Full tag loop, reupdates all tags
+
+        We have to create a list instead of iterating because when we aggregate the list, 
+        mongodb only keeps the data for 10 minutes max in it's cache, we cannot change 
+        this as we're on the free tier. Instead we'll cache the list
         """
         while True:
-            self.ftlc = 0
+            self.ftl_ids = []
             async for tag in self.TAGDB.find({"deleted": False}):
-                self.ftlc += 1
+                self.ftl_ids.append(tag.get("_id"))
+            print(f"Finished gathering {Fore.CYAN}{len(self.ftl_ids):,}{Style.RESET_ALL} Tag IDS")
 
-                loop.create_task(self.rs_TAGDB(tag.get("_id"), ses))
-                await asyncio.sleep(0.2)
+            for tag in self.ftl_ids:
+                loop.create_task(self.rs_TAGDB(tag, ses))
+                await asyncio.sleep(1.5)
 
             loop.create_task(self.hook.update_ftl())
 
