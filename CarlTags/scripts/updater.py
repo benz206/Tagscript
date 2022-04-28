@@ -54,7 +54,7 @@ class FishHook:
             try:
                 webhook.set_content(
                     f"""```ansi
-{Fore.BLUE}{", ".join(temp)}{Style.RESET_ALL}
+{Fore.BLUE} {", ".join(temp)} {Style.RESET_ALL}
 ```"""
                 )
                 webhook.execute()
@@ -70,7 +70,7 @@ class FishHook:
             webhook.execute()
         
         webhook.set_content(
-            f""""```ansi
+            f"""```ansi
 {Fore.RED}{len_ftl} tags have been updated.{Style.RESET_ALL}
 ```"""
         )
