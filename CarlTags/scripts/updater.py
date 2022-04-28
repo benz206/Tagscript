@@ -260,7 +260,7 @@ class Turtle:
         """
         while True:
             self.ftlc = 0
-            async for tag in self.TAGDB.find({"deleted": False}):
+            async for tag in self.TAGDB.find({"deleted": False}, timeout=False):
                 self.ftlc += 1
 
                 loop.create_task(self.rs_TAGDB(tag.get("_id"), ses))
@@ -274,7 +274,7 @@ class Turtle:
         """
         while True:
             self.rtlc = 0
-            cursor = self.TAGDB.find({}).sort("_id", -1)
+            cursor = self.TAGDB.find({}, timeout=False).sort("_id", -1)
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("_id")
 
