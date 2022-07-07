@@ -26,12 +26,13 @@ This is meant as a fun project for me! Enjoy!
 
 import asyncio
 import datetime
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
-import aiohttp
-from dotenv import load_dotenv
-from colorama import Style, Fore
 import sys
+
+import aiohttp
+from colorama import Fore, Style
+from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
 
@@ -95,7 +96,9 @@ class TagscriptMiner:
         """Save a tags data to our db"""
         document = {
             "_id": data.get("id"),
-            "created_at": datetime.datetime.strptime(data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"),
+            "created_at": datetime.datetime.strptime(
+                data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"
+            ),
             "guild_id": str(data.get("location_id", None)),
             "tag_name": data.get("name"),
             "nsfw": data.get("nsfw", None),
@@ -107,7 +110,7 @@ class TagscriptMiner:
             "last_fetched": datetime.datetime.utcnow(),
             "deleted": False,
             "description": data.get("description", None),
-            "restricted": data.get("restricted", False)
+            "restricted": data.get("restricted", False),
         }
         quick_query = {"_id": data.get("id")}
         await self.TAGDB.replace_one(quick_query, document, True)

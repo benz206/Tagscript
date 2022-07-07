@@ -21,14 +21,14 @@ Tag Schema
 """
 
 import asyncio
-from flask import Flask
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
-import requests
-from threading import Thread
 import time
 import urllib
+from threading import Thread
 
+import requests
+from flask import Flask
+from motor.motor_asyncio import AsyncIOMotorClient
 
 connection_string = f"mongodb+srv://{os.environ['Mongo_User']}:{os.environ['Mongo_Pass']}@carltagscluster.nyxt2.mongodb.net/TagDB?retryWrites=true&w=majority"
 MONGODB = AsyncIOMotorClient(connection_string)

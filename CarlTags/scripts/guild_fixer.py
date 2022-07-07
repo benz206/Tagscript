@@ -1,8 +1,9 @@
 import asyncio
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
+
+from colorama import Fore, Style
 from dotenv import load_dotenv
-from colorama import Style, Fore
+from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
 loop = asyncio.get_event_loop()
@@ -33,10 +34,14 @@ class Turtle:
         """
         async for tag in self.TAGDB.find({}):
             if isinstance(tag.get("guild_id"), int):
-                await self.TAGDB.update_one({"_id": tag.get("_id")}, {"$set": {"guild_id": str(tag.get("guild_id"))}})
+                await self.TAGDB.update_one(
+                    {"_id": tag.get("_id")},
+                    {"$set": {"guild_id": str(tag.get("guild_id"))}},
+                )
                 print(f"Updated {tag.get('_id')}")
             else:
                 pass
+
 
 turtle = Turtle()
 

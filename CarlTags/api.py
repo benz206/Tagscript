@@ -3,12 +3,12 @@ This is a completely public api
 """
 
 import asyncio
+import os
+
 from flask import Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
-
 
 app = Flask(__name__)
 loop = asyncio.get_event_loop()

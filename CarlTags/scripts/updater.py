@@ -4,13 +4,13 @@ This is meant to scan tags and look for new made tags and then of course update 
 
 import asyncio
 import datetime
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
-import aiohttp
-from dotenv import load_dotenv
-from colorama import Style, Fore
-from discord_webhook import DiscordWebhook, DiscordEmbed
 
+import aiohttp
+from colorama import Fore, Style
+from discord_webhook import DiscordEmbed, DiscordWebhook
+from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
 loop = asyncio.get_event_loop()
@@ -47,10 +47,12 @@ class FishHook:
 
         for i in range(round(len(self.ftl_updates) / 220) - 1):
             temp = []
-            for i in range(220): # Numer of ids we should be able to fit into the message
+            for i in range(
+                220
+            ):  # Numer of ids we should be able to fit into the message
                 temp.append(self.ftl_updates[0])
                 self.ftl_updates.pop(0)
-                    
+
             try:
                 webhook.set_content(
                     f"""```ansi
@@ -60,7 +62,7 @@ class FishHook:
                 webhook.execute()
             except:
                 pass
-                
+
         if self.ftl_updates:
             webhook.set_content(
                 f"""```ansi
@@ -68,7 +70,7 @@ class FishHook:
 ```"""
             )
             webhook.execute()
-        
+
         webhook.set_content(
             f"""```ansi
 {Fore.RED}{len_ftl} tags have been updated.{Style.RESET_ALL}
@@ -162,6 +164,11 @@ class Turtle:
                     data = await tag.json()
                     tag = await self.TAGDB.find_one({"_id": int(_id)})
 
+                    if "{=(PRIVATE):true}" in data.get("content"):
+                        deleted = True
+                    else:
+                        deleted = data.get("deleted")
+
                     if (
                         data.get("id") == tag.get("_id")
                         and data.get("name") == tag.get("tag_name")
@@ -192,7 +199,7 @@ class Turtle:
                             "content": data.get("content", ""),
                             "embed": data.get("embed", ""),
                             "last_fetched": datetime.datetime.utcnow(),
-                            "deleted": False,
+                            "deleted": deleted,
                             "description": data.get("description", None),
                             "restricted": data.get("restricted", False),
                         }
@@ -269,15 +276,17 @@ class Turtle:
         """
         Full tag loop, reupdates all tags
 
-        We have to create a list instead of iterating because when we aggregate the list, 
-        mongodb only keeps the data for 10 minutes max in it's cache, we cannot change 
+        We have to create a list instead of iterating because when we aggregate the list,
+        mongodb only keeps the data for 10 minutes max in it's cache, we cannot change
         this as we're on the free tier. Instead we'll cache the list
         """
         while True:
             self.ftl_ids = []
             async for tag in self.TAGDB.find({"deleted": False}):
                 self.ftl_ids.append(tag.get("_id"))
-            print(f"Finished gathering {Fore.CYAN}{len(self.ftl_ids):,}{Style.RESET_ALL} Tag IDS")
+            print(
+                f"Finished gathering {Fore.CYAN}{len(self.ftl_ids):,}{Style.RESET_ALL} Tag IDS"
+            )
 
             for tag in self.ftl_ids:
                 loop.create_task(self.rs_TAGDB(tag, ses))

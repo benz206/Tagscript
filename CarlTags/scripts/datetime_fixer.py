@@ -1,9 +1,10 @@
 import asyncio
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
-from dotenv import load_dotenv
-from colorama import Style, Fore
 import datetime
+import os
+
+from colorama import Fore, Style
+from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
 loop = asyncio.get_event_loop()
@@ -34,10 +35,18 @@ class Turtle:
         """
         async for tag in self.TAGDB.find({}):
             if not isinstance(tag.get("created_at"), datetime.date):
-                await self.TAGDB.update_one({
-                    "_id": tag.get("_id")}, {"$set": {"created_at": datetime.datetime.strptime(tag.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT")}
-                })
+                await self.TAGDB.update_one(
+                    {"_id": tag.get("_id")},
+                    {
+                        "$set": {
+                            "created_at": datetime.datetime.strptime(
+                                tag.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"
+                            )
+                        }
+                    },
+                )
                 print(f"Updated {tag.get('_id')}")
+
 
 turtle = Turtle()
 
