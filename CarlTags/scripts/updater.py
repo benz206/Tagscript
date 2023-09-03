@@ -88,7 +88,7 @@ class FishHook:
             url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
             rate_limit_retry=True,
         )
-        visual = f"\n- ".join(self.rtl_updates)
+        visual = "\n- ".join(self.rtl_updates)
         if self.rtl_updates:
             webhook.set_content(
                 f"""```ansi
@@ -104,8 +104,7 @@ class FishHook:
             self.rtl_loops = 0
             webhook.execute()
             return
-        else:
-            self.rtl_loops += 1
+        self.rtl_loops += 1
 
     async def error(self, msg) -> None:
         """
@@ -117,7 +116,7 @@ class FishHook:
         )
         webhook.add_embed(
             DiscordEmbed(
-                title=f"Error",
+                title="Error",
                 description=f"""```ansi
 {msg}
 ```""",
@@ -144,7 +143,7 @@ class Turtle:
         """
         Start the Turtle
         """
-        print(f"Starting turtle.")
+        print("Starting turtle.")
         async with aiohttp.ClientSession() as ses:
             loop.create_task(self.full_tag_loop(ses))
             await self.recon_tag_loop(ses)
@@ -157,12 +156,12 @@ class Turtle:
             async with ses.get(self.api_url + str(_id)) as tag:
                 if tag.status == 404:
                     await self.TAGDB.update_one(
-                        {"_id": int(_id)}, {"$set": {"deleted": True}}
+                        {"id": int(_id)}, {"$set": {"deleted": True}}
                     )
 
                 elif tag.status == 200:
                     data = await tag.json()
-                    tag = await self.TAGDB.find_one({"_id": int(_id)})
+                    tag = await self.TAGDB.find_one({"id": int(_id)})
 
                     if "{=(PRIVATE):true}" in data.get("content"):
                         deleted = True
@@ -170,7 +169,7 @@ class Turtle:
                         deleted = data.get("deleted")
 
                     if (
-                        data.get("id") == tag.get("_id")
+                        data.get("id") == tag.get("id")
                         and data.get("name") == tag.get("tag_name")
                         and data.get("nsfw") == tag.get("nsfw")
                         and data.get("owner_id") == tag.get("owner_id")
@@ -180,13 +179,13 @@ class Turtle:
                         and data.get("embed") == tag.get("embed")
                     ):
                         await self.TAGDB.update_one(
-                            {"_id": int(_id)},
+                            {"id": int(_id)},
                             {"$set": {"last_fetched": datetime.datetime.utcnow()}},
                         )
 
                     else:
                         document = {
-                            "_id": data.get("id"),
+                            "id": data.get("id"),
                             "created_at": datetime.datetime.strptime(
                                 data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"
                             ),
@@ -203,7 +202,7 @@ class Turtle:
                             "description": data.get("description", None),
                             "restricted": data.get("restricted", False),
                         }
-                        quick_query = {"_id": data.get("id")}
+                        quick_query = {"id": data.get("id")}
                         await self.TAGDB.replace_one(quick_query, document, True)
                         self.hook.ftl_updates.append(str(_id))
                         print(
@@ -238,7 +237,7 @@ class Turtle:
                 elif tag.status == 200:
                     data = await tag.json()
                     document = {
-                        "_id": data.get("id"),
+                        "id": data.get("id"),
                         "created_at": datetime.datetime.strptime(
                             data.get("created_at"), "%a, %d %b %Y %H:%M:%S GMT"
                         ),
@@ -255,7 +254,7 @@ class Turtle:
                         "description": data.get("description", None),
                         "restricted": data.get("restricted", False),
                     }
-                    quick_query = {"_id": data.get("id")}
+                    quick_query = {"id": data.get("id")}
                     await self.TAGDB.replace_one(quick_query, document, True)
                     self.hook.rtl_updates.append(str(_id))
                     print(
@@ -283,7 +282,7 @@ class Turtle:
         while True:
             self.ftl_ids = []
             async for tag in self.TAGDB.find({"deleted": False}):
-                self.ftl_ids.append(tag.get("_id"))
+                self.ftl_ids.append(tag.get("id"))
             print(
                 f"Finished gathering {Fore.CYAN}{len(self.ftl_ids):,}{Style.RESET_ALL} Tag IDS"
             )
@@ -300,9 +299,9 @@ class Turtle:
         """
         while True:
             self.rtlc = 0
-            cursor = self.TAGDB.find({}).sort("_id", -1)
+            cursor = self.TAGDB.find({}).sort("id", -1)
             for tag in await cursor.to_list(length=1):
-                latest = tag.get("_id")
+                latest = tag.get("id")
 
             async for i in async_range(1, 3000):
                 self.rtlc += 1

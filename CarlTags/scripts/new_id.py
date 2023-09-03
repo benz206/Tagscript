@@ -12,7 +12,8 @@ loop = asyncio.get_event_loop()
 
 class Turtle:
     """
-    This is for carl so why not call it turtle"""
+    Took roughly 10 minutes to run and update all the tags at this point, had tag id 1.8 mil at this time
+    """
 
     def __init__(self) -> None:
         self.api_url = "https://carl.gg/api/v1/tags/"
