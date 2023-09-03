@@ -299,7 +299,7 @@ class Turtle:
         """
         while True:
             self.rtlc = 0
-            cursor = self.TAGDB.find({}).sort("id", -1)
+            cursor = self.TAGDB.find({}, {"id": 0}).sort("id", -1)
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("id")
 
