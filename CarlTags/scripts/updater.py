@@ -303,7 +303,7 @@ class Turtle:
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("id")
 
-            async for i in async_range(1, 3000):
+            async for i in async_range(1, 1000):
                 self.rtlc += 1
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
