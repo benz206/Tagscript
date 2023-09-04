@@ -289,7 +289,7 @@ class Turtle:
 
             for tag in self.ftl_ids:
                 loop.create_task(self.rs_TAGDB(tag, ses))
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.3)
 
             loop.create_task(self.hook.update_ftl())
 
@@ -303,7 +303,7 @@ class Turtle:
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("id")
 
-            async for i in async_range(1, 1000):
+            async for i in async_range(1, 3000):
                 self.rtlc += 1
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
