@@ -134,7 +134,7 @@ class Turtle:
         self.api_url = "https://carl.gg/api/v1/tags/"
         connection_string = f"mongodb+srv://{os.environ['Mongo_User']}:{os.environ['Mongo_Pass']}@carltagscluster.nyxt2.mongodb.net/TagDB?retryWrites=true&w=majority"
         self.MONGODB = AsyncIOMotorClient(connection_string)
-        self.TAGDB = self.MONGODB["TagDB"]["NewTags"]
+        self.TAGDB = self.MONGODB["TagDB"]["Tags"]
         self.hook = FishHook()
 
         print(f"{Fore.GREEN}Connected to DB{Style.RESET_ALL}")
