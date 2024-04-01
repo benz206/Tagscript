@@ -70,6 +70,7 @@ class FishHook:
 ```"""
             )
             webhook.execute()
+            await asyncio.sleep(1)
 
         webhook.set_content(
             f"""```ansi
@@ -77,6 +78,7 @@ class FishHook:
 ```"""
         )
         webhook.execute()
+        await asyncio.sleep(1)
         self.ftl_updates = []
         return
 
