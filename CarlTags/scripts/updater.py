@@ -78,7 +78,7 @@ class FishHook:
 ```"""
         )
         webhook.execute()
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
         self.ftl_updates = []
         return
 
@@ -91,6 +91,7 @@ class FishHook:
             rate_limit_retry=True,
         )
         visual = "\n- ".join(self.rtl_updates)
+        asyncio.sleep(3);
         if self.rtl_updates:
             webhook.set_content(
                 f"""```ansi
@@ -112,6 +113,7 @@ class FishHook:
         """
         When an error occurs
         """
+        await asyncio.sleep(15) # to avoid getting rate limited again
         webhook = DiscordWebhook(
             url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
             rate_limit_retry=True,
