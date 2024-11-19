@@ -17,3 +17,7 @@ while true; do
   # Wait for 12 hours
   sleep 43200
 done
+
+# nohup ./scripts/restart_script.sh &
+
+# pkill -f scripts/restart_script.sh
