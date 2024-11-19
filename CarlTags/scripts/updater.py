@@ -91,7 +91,7 @@ class FishHook:
             rate_limit_retry=True,
         )
         visual = "\n- ".join(self.rtl_updates)
-        asyncio.sleep(3);
+        await asyncio.sleep(3);
         if self.rtl_updates:
             webhook.set_content(
                 f"""```ansi
