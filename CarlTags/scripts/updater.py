@@ -332,6 +332,7 @@ class Turtle:
             for tag in self.ftl_ids:
                 loop.create_task(self.rs_TAGDB(tag, ses))
                 task_count += 1
+                await asyncio.sleep(0.1)
 
             # await self.hook.send_ending_message()
 
