@@ -350,7 +350,7 @@ class Turtle:
                 self.rtlc += 1
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
-                await asyncio.sleep(0.05)
+                # await asyncio.sleep(0.05)
 
             loop.create_task(self.hook.update_rtl(latest))
 
