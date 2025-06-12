@@ -148,6 +148,20 @@ class FishHook:
         await asyncio.sleep(3)
         return
 
+    async def send_ending_message(self) -> None:
+
+        webhook = DiscordWebhook(
+            url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+        )
+        webhook.add_embed(
+            DiscordEmbed(
+                title="Ending",
+                description=f"""```ansi
+                {Fore.GREEN}Ending{Style.RESET_ALL}
+                ```""",
+            )
+        )
+        webhook.execute()
 
 class Turtle:
     """
@@ -326,6 +340,8 @@ class Turtle:
             # Send final update for any remaining tasks
             if task_count % 1000 != 0:
                 loop.create_task(self.hook.update_ftl())
+
+            await self.hook.send_ending_message()
 
     async def recon_tag_loop(self, ses) -> None:
         """
