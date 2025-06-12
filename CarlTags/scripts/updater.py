@@ -326,22 +326,14 @@ class Turtle:
                 f"Finished gathering {Fore.CYAN}{len(self.ftl_ids):,}{Style.RESET_ALL} Tag IDS"
             )
 
-            await self.hook.send_starting_message()
+            # await self.hook.send_starting_message()
 
             task_count = 0
             for tag in self.ftl_ids:
                 loop.create_task(self.rs_TAGDB(tag, ses))
                 task_count += 1
-                
-                if task_count % 1000 == 0:
-                    loop.create_task(self.hook.update_ftl())
-                    await asyncio.sleep(3)  # Give some time for the updates to process
 
-            # Send final update for any remaining tasks
-            if task_count % 1000 != 0:
-                loop.create_task(self.hook.update_ftl())
-
-            await self.hook.send_ending_message()
+            # await self.hook.send_ending_message()
 
     async def recon_tag_loop(self, ses) -> None:
         """
