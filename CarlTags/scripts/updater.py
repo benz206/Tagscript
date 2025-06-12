@@ -129,6 +129,25 @@ class FishHook:
         )
         webhook.execute()
 
+    async def send_starting_message(self) -> None:
+        """
+        Send a starting message to the webhook
+        """
+        webhook = DiscordWebhook(
+            url=f"https://discord.com/api/webhooks/{os.getenv('webhook')}",
+        )
+        webhook.add_embed(
+            DiscordEmbed(
+                title="Starting",
+                description=f"""```ansi
+{Fore.GREEN}Starting{Style.RESET_ALL}
+```""",
+            )
+        )
+        webhook.execute()
+        await asyncio.sleep(3)
+        return
+
 
 class Turtle:
     """
@@ -210,7 +229,7 @@ class Turtle:
                         await self.TAGDB.replace_one(quick_query, document, True)
                         self.hook.ftl_updates.append(str(_id))
                         print(
-                            f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}"
+                            f"Updated Tag ID: {Fore.CYAN}{data.get('id')}{Style.RESET_ALL}" 
                         )
                 else:
                     # print(f"{Fore.RED}{str(tag.status)} Failed.{Style.RESET_ALL}")
@@ -293,11 +312,21 @@ class Turtle:
                 f"Finished gathering {Fore.CYAN}{len(self.ftl_ids):,}{Style.RESET_ALL} Tag IDS"
             )
 
+            await self.hook.send_starting_message()
+
+            task_count = 0
             for tag in self.ftl_ids:
                 loop.create_task(self.rs_TAGDB(tag, ses))
                 await asyncio.sleep(0.3)
+                task_count += 1
+                
+                if task_count % 1000 == 0:
+                    loop.create_task(self.hook.update_ftl())
+                    await asyncio.sleep(3)  # Give some time for the updates to process
 
-            loop.create_task(self.hook.update_ftl())
+            # Send final update for any remaining tasks
+            if task_count % 1000 != 0:
+                loop.create_task(self.hook.update_ftl())
 
     async def recon_tag_loop(self, ses) -> None:
         """
