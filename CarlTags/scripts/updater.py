@@ -317,7 +317,6 @@ class Turtle:
             task_count = 0
             for tag in self.ftl_ids:
                 loop.create_task(self.rs_TAGDB(tag, ses))
-                await asyncio.sleep(0.3)
                 task_count += 1
                 
                 if task_count % 1000 == 0:
