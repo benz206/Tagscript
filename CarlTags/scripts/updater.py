@@ -45,10 +45,10 @@ class FishHook:
         len_ftl = len(self.ftl_updates)
         self.ftl_visual = []
 
-        for i in range(round(len(self.ftl_updates) / 220) - 1):
+        for i in range(round(len(self.ftl_updates) / 210) - 1):
             temp = []
             for i in range(
-                220
+                210
             ):  # Numer of ids we should be able to fit into the message
                 temp.append(self.ftl_updates[0])
                 self.ftl_updates.pop(0)
@@ -175,32 +175,7 @@ class Turtle:
         self.hook = FishHook()
 
         print(f"{Fore.GREEN}Connected to DB{Style.RESET_ALL}")
-
-    async def deep_scan_loop(self, ses) -> None:
-        """
-        One-time deep scan to find and update latest tags up to 100,000 tags
-        """
-        print(f"{Fore.YELLOW}Starting deep scan for latest tags...{Style.RESET_ALL}")
-        await self.hook.send_starting_message()
         
-        cursor = self.TAGDB.find({}, {"id": 1}).sort("id", -1)
-        for tag in await cursor.to_list(length=1):
-            latest = tag.get("id")
-        
-        task_count = 0
-        for i in range(1, 100001):  # Scan up to 100,000 tags
-            _id = latest + i
-            loop.create_task(self.s_TAGDB(_id, ses))
-            task_count += 1
-            await asyncio.sleep(0.1)
-            
-            if task_count % 1000 == 0:
-                loop.create_task(self.hook.update_rtl(latest))
-                await asyncio.sleep(3)
-        
-        await self.hook.send_ending_message()
-        print(f"{Fore.GREEN}Deep scan completed!{Style.RESET_ALL}")
-
     async def start(self) -> None:
         """
         Start the Turtle
@@ -360,7 +335,10 @@ class Turtle:
             for tag in self.ftl_ids:
                 loop.create_task(self.rs_TAGDB(tag, ses))
                 task_count += 1
-                await asyncio.sleep(0.1)
+                if task_count % 1000 == 0:
+                    print("Successfully went through 1000 tags")
+                    await asyncio.sleep(3)
+                await asyncio.sleep(0.05)
 
             # await self.hook.send_ending_message()
 
@@ -379,6 +357,7 @@ class Turtle:
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
                 await asyncio.sleep(0.05)
+            print("Successfully went through 3000 tags")
 
             loop.create_task(self.hook.update_rtl(latest))
 

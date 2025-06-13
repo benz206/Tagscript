@@ -161,6 +161,7 @@ class DeepScanner:
                 
                 if task_count % 1000 == 0:
                     loop.create_task(self.hook.update_rtl(latest))
+                    print("Successfully went through 1000 tags")
                     await asyncio.sleep(3)
             
             await self.hook.send_ending_message()
