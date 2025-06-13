@@ -44,11 +44,11 @@ class TagStats:
     updated_tags: int = 0
     deleted_tags: int = 0
     errors: int = 0
-    start_time: datetime.datetime = datetime.datetime.utcnow()
+    start_time: datetime.datetime = datetime.datetime.now(datetime.UTC)
 
     def get_runtime(self) -> str:
         """Get formatted runtime duration"""
-        duration = datetime.datetime.utcnow() - self.start_time
+        duration = datetime.datetime.now(datetime.UTC) - self.start_time
         hours = duration.seconds // 3600
         minutes = (duration.seconds % 3600) // 60
         return f"{hours}h {minutes}m"
@@ -62,7 +62,7 @@ class RateLimiter:
 
     async def acquire(self):
         """Acquire a rate limit token"""
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.UTC)
         
         while self.requests and (now - self.requests[0]).total_seconds() > self.time_window:
             self.requests.popleft()
@@ -77,10 +77,12 @@ class RateLimiter:
 class DiscordNotifier:
     """Handles Discord webhook notifications"""
     def __init__(self, webhook_url: str):
+        if not webhook_url.startswith('http'):
+            webhook_url = f"https://discord.com/api/webhooks/{webhook_url}"
         self.webhook_url = webhook_url
         self.update_queue = deque(maxlen=1000)
         self.stats = TagStats()
-        self.last_notification = datetime.datetime.utcnow()
+        self.last_notification = datetime.datetime.now(datetime.UTC)
 
     async def send_notification(self, content: str, embed: Optional[DiscordEmbed] = None):
         """Send a notification to Discord"""
@@ -94,7 +96,7 @@ class DiscordNotifier:
     async def queue_update(self, tag_id: int, operation: str):
         """Queue a tag update for notification"""
         self.update_queue.append((tag_id, operation))
-        if len(self.update_queue) >= 100 or (datetime.datetime.utcnow() - self.last_notification).total_seconds() > 300:
+        if len(self.update_queue) >= 100 or (datetime.datetime.now(datetime.UTC) - self.last_notification).total_seconds() > 300:
             await self.flush_updates()
 
     async def flush_updates(self):
@@ -109,7 +111,7 @@ class DiscordNotifier:
 
         content = f"```ansi\n{Fore.BLUE}Updates:\n{Fore.GREEN}{chr(10).join(updates)}{Style.RESET_ALL}\n```"
         await self.send_notification(content)
-        self.last_notification = datetime.datetime.utcnow()
+        self.last_notification = datetime.datetime.now(datetime.UTC)
 
     async def send_stats(self):
         """Send current statistics to Discord"""
@@ -179,7 +181,7 @@ class TagUpdater:
             if not data:
                 await self.tagdb.update_one(
                     {"id": tag_id},
-                    {"$set": {"deleted": True, "last_fetched": datetime.datetime.utcnow()}}
+                    {"$set": {"deleted": True, "last_fetched": datetime.datetime.now(datetime.UTC)}}
                 )
                 self.notifier.stats.deleted_tags += 1
                 await self.notifier.queue_update(tag_id, "Deleted")
@@ -193,7 +195,7 @@ class TagUpdater:
                 if self._tag_unchanged(existing_tag, data):
                     await self.tagdb.update_one(
                         {"id": tag_id},
-                        {"$set": {"last_fetched": datetime.datetime.utcnow()}}
+                        {"$set": {"last_fetched": datetime.datetime.now(datetime.UTC)}}
                     )
                     return
 
@@ -222,7 +224,7 @@ class TagUpdater:
         """Create a tag document from API data"""
         return {
             "id": data["id"],
-            "created_at": datetime.datetime.strptime(data["created_at"], "%a, %d %b %Y %H:%M:%S GMT"),
+            "created_at": datetime.datetime.strptime(data["created_at"], "%a, %d %b %Y %H:%M:%S GMT").replace(tzinfo=datetime.UTC),
             "guild_id": str(data.get("location_id")),
             "tag_name": data["name"],
             "nsfw": data.get("nsfw"),
@@ -231,7 +233,7 @@ class TagUpdater:
             "uses": data.get("uses", 0),
             "content": data.get("content", ""),
             "embed": data.get("embed", ""),
-            "last_fetched": datetime.datetime.utcnow(),
+            "last_fetched": datetime.datetime.now(datetime.UTC),
             "deleted": deleted,
             "description": data.get("description"),
             "restricted": data.get("restricted", False)
