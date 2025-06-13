@@ -182,11 +182,8 @@ class Turtle:
         """
         print("Starting turtle.")
         async with aiohttp.ClientSession() as ses:
-            # Run deep scan first
-            await self.deep_scan_loop(ses)
-            # Then start the regular loops
             loop.create_task(self.full_tag_loop(ses))
-            await self.recon_tag_loop(ses)
+            loop.create_task(self.recon_tag_loop(ses))
 
     async def rs_TAGDB(self, _id, ses) -> None:
         """
