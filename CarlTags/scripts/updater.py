@@ -176,12 +176,40 @@ class Turtle:
 
         print(f"{Fore.GREEN}Connected to DB{Style.RESET_ALL}")
 
+    async def deep_scan_loop(self, ses) -> None:
+        """
+        One-time deep scan to find and update latest tags up to 100,000 tags
+        """
+        print(f"{Fore.YELLOW}Starting deep scan for latest tags...{Style.RESET_ALL}")
+        await self.hook.send_starting_message()
+        
+        cursor = self.TAGDB.find({}, {"id": 1}).sort("id", -1)
+        for tag in await cursor.to_list(length=1):
+            latest = tag.get("id")
+        
+        task_count = 0
+        for i in range(1, 100001):  # Scan up to 100,000 tags
+            _id = latest + i
+            loop.create_task(self.s_TAGDB(_id, ses))
+            task_count += 1
+            await asyncio.sleep(0.1)
+            
+            if task_count % 1000 == 0:
+                loop.create_task(self.hook.update_rtl(latest))
+                await asyncio.sleep(3)
+        
+        await self.hook.send_ending_message()
+        print(f"{Fore.GREEN}Deep scan completed!{Style.RESET_ALL}")
+
     async def start(self) -> None:
         """
         Start the Turtle
         """
         print("Starting turtle.")
         async with aiohttp.ClientSession() as ses:
+            # Run deep scan first
+            await self.deep_scan_loop(ses)
+            # Then start the regular loops
             loop.create_task(self.full_tag_loop(ses))
             await self.recon_tag_loop(ses)
 
@@ -346,11 +374,11 @@ class Turtle:
             for tag in await cursor.to_list(length=1):
                 latest = tag.get("id")
 
-            async for i in async_range(1, 300000):
+            async for i in async_range(1, 3000):
                 self.rtlc += 1
                 _id = latest + i
                 loop.create_task(self.s_TAGDB(_id, ses))
-                # await asyncio.sleep(0.05)
+                await asyncio.sleep(0.05)
 
             loop.create_task(self.hook.update_rtl(latest))
 
