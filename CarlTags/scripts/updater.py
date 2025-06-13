@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
 
 
 async def async_range(x, y) -> int:
@@ -182,8 +182,18 @@ class Turtle:
         """
         print("Starting turtle.")
         async with aiohttp.ClientSession() as ses:
-            loop.create_task(self.full_tag_loop(ses))
-            loop.create_task(self.recon_tag_loop(ses))
+            # Create tasks and store them
+            self.full_tag_task = loop.create_task(self.full_tag_loop(ses))
+            self.recon_tag_task = loop.create_task(self.recon_tag_loop(ses))
+            
+            # Wait for both tasks to complete (they should run indefinitely)
+            try:
+                await asyncio.gather(self.full_tag_task, self.recon_tag_task)
+            except asyncio.CancelledError:
+                # Handle graceful shutdown if needed
+                self.full_tag_task.cancel()
+                self.recon_tag_task.cancel()
+                await asyncio.gather(self.full_tag_task, self.recon_tag_task, return_exceptions=True)
 
     async def rs_TAGDB(self, _id, ses) -> None:
         """
